@@ -1,0 +1,290 @@
+:root {
+  color-scheme: light;
+  font-family: 'Segoe UI', 'PingFang SC', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  color: #1f2a37;
+  background: #f3f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(99, 179, 237, 0.18), transparent 44%),
+    radial-gradient(circle at 90% 10%, rgba(252, 165, 165, 0.18), transparent 42%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.window-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #b9cbe2;
+  background: #ffffff;
+  color: #274767;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.window-badge.host {
+  border-color: #90c7ff;
+  background: #e8f5ff;
+  color: #0e4a7a;
+}
+
+.window-badge.viewer {
+  border-color: #f7bc88;
+  background: #fff3e8;
+  color: #884100;
+}
+
+.panel {
+  width: min(1120px, 100%);
+  background: #ffffff;
+  border: 1px solid #d8e3f1;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 14px 38px rgba(15, 35, 95, 0.1);
+}
+
+.mode-selector {
+  width: min(640px, 100%);
+}
+
+.mode-selector h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.mode-selector p {
+  margin-top: 8px;
+  color: #637288;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.field span {
+  font-size: 14px;
+  color: #475569;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #c6d5e5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #0f4c81;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #d9e8f8;
+  color: #14385a;
+}
+
+button:hover {
+  filter: brightness(1.02);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.status-block {
+  border: 1px solid #dbe5f0;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f9fbfe;
+}
+
+.status-block p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.status-note {
+  border: 1px dashed #bfd0e2;
+  border-radius: 10px;
+  padding: 12px;
+  color: #3d5268;
+  background: #fbfdff;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.permission-card {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #d2deea;
+  background: #f8fbff;
+}
+
+.permission-card.ok {
+  border-color: #b8e4cb;
+  background: #f0fbf5;
+}
+
+.permission-card.warn {
+  border-color: #f3d0ab;
+  background: #fff7ed;
+}
+
+.permission-card p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.permission-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.remote-video {
+  margin-top: 16px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #d1dfef;
+  background: #0f172a;
+}
+
+.remote-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.remote-video.interactive {
+  cursor: crosshair;
+  outline: none;
+}
+
+.remote-video.interactive:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.45);
+}
+
+.video-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #c8d7ec;
+  background: rgba(15, 23, 42, 0.5);
+  font-size: 14px;
+}
+
+.logs-area {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.logs-area.single {
+  grid-template-columns: 1fr;
+}
+
+.logs-area > div {
+  border: 1px solid #dce6f2;
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 180px;
+  max-height: 260px;
+  overflow: auto;
+  background: #f9fbff;
+}
+
+.logs-area h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.logs-area ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13px;
+  color: #334155;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    padding: 12px;
+  }
+
+  .grid-two,
+  .logs-area {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+}

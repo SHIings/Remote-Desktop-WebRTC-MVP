@@ -1,0 +1,8 @@
+node_modules
+.pnpm-store
+
+server/dist
+client/dist
+client/dist-electron
+
+.DS_Store
