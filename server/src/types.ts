@@ -49,6 +49,7 @@ export interface PeerLeftMessage {
 
 export interface ErrorMessage {
   type: 'error';
+  code?: string;
   message: string;
   roomId?: string;
 }
@@ -72,4 +73,10 @@ export interface Room {
 export interface PeerInfo {
   roomId: string;
   role: PeerRole;
+}
+
+export interface RoomStats {
+  totalRooms: number;
+  totalPeers: number;
+  pairedRooms: number;
 }

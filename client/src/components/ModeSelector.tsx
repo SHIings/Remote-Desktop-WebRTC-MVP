@@ -17,8 +17,8 @@ const ModeSelector = ({
 }: ModeSelectorProps): JSX.Element => {
   return (
     <section className="panel mode-selector">
-      <h1>Remote Desktop Control MVP</h1>
-      <p>Electron + WebRTC + RTCDataChannel</p>
+      <h1>Remote Desktop Control</h1>
+      <p>Electron Client with WebRTC Streaming and Secure Signaling</p>
 
       <label className="field">
         <span>Signaling Server URL</span>

@@ -47,6 +47,7 @@ export interface PeerLeftMessage {
 
 export interface ErrorMessage {
   type: 'error';
+  code?: string;
   message: string;
   roomId?: string;
 }

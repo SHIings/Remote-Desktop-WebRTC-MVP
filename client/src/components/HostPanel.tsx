@@ -367,7 +367,9 @@ const HostPanel = ({ signalingUrl, roomId, onBack }: HostPanelProps): JSX.Elemen
 
         if (message.type === 'error') {
           setConnectionStatus(`Signaling error: ${message.message}`);
-          pushLog(`Server error: ${message.message}`);
+          pushLog(
+            `Server error${message.code ? ` [${message.code}]` : ''}: ${message.message}`
+          );
           return;
         }
       }

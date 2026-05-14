@@ -1,57 +1,88 @@
-# Remote Desktop WebRTC MVP
+# Remote Desktop WebRTC
 
-一个用于面试作业交付的远程桌面控制系统 MVP。
+A remote desktop control system built with Electron + WebRTC.
 
-目标是一天内可演示、可跑通、结构清晰：
-- 画面传输走 `WebRTC MediaStream`
-- 控制事件走 `WebRTC RTCDataChannel`
-- 服务端只做 `WebSocket` 信令转发，不转发视频流
+This repository contains a production-oriented baseline for:
+- low-latency screen streaming (`WebRTC MediaStream`)
+- bidirectional control signaling (`RTCDataChannel`)
+- lightweight room-based signaling (`Node.js + ws`)
 
-## 1. 项目简介
+## Overview
 
-项目包含两个子应用：
-- `server`：Node.js + TypeScript + ws 信令服务
-- `client`：Electron + React + TypeScript + Vite 桌面客户端（Host / Viewer 双模式）
+The system is split into two runtime components:
 
-Host 负责共享桌面并接收控制事件；Viewer 负责看远程画面并发送鼠标键盘事件。
+- `client` (Electron):
+  - Host mode: captures desktop and receives control events
+  - Viewer mode: renders remote stream and sends control events
+- `server` (Node.js):
+  - WebSocket signaling only
+  - room lifecycle management (`host` + `viewer`)
+  - no media relay, no video frame forwarding
 
-## 2. 技术栈
+## Key Capabilities
 
-- Desktop Client: Electron + React + TypeScript + Vite
-- Backend: Node.js + TypeScript + ws
-- Real-time streaming: WebRTC MediaStream
-- Control events: WebRTC RTCDataChannel
-- Monorepo: pnpm workspace
+- WebRTC `offer/answer/ice-candidate` negotiation
+- Room isolation with strict two-peer limit
+- Control channel over `RTCDataChannel` (`mousemove`, `mousedown`, `mouseup`, `click`, `keydown`, `keyup`)
+- Host-side execution guard (`Allow Remote Control`)
+- Viewer-side safety guard (`Enable Remote Control` + `ESC` emergency stop)
+- Native input execution via `@nut-tree/nut-js` with automatic mock fallback
+- Signaling server health endpoint (`/healthz`)
+- Heartbeat + idle connection eviction on signaling layer
 
-## 3. 架构图
+## High-Level Architecture
 
 ```mermaid
 flowchart LR
   Host["Host Electron"]
-  Viewer["Viewer Electron"]
+  Viewer["Viewer Electron / Browser Viewer"]
   Signal["Signaling Server (Node.js + ws)"]
 
-  Host -- "WebRTC MediaStream (Screen)" --> Viewer
+  Host -- "WebRTC MediaStream (Desktop)" --> Viewer
   Viewer -- "RTCDataChannel (Control Events)" --> Host
 
   Host -- "WebSocket Signaling" --> Signal
   Viewer -- "WebSocket Signaling" --> Signal
 ```
 
-## 4. 核心架构说明
+Core design principles:
+- media/data plane separated from signaling plane
+- server remains stateless for media transport
+- explicit host-side permission gate before native control execution
 
-- `WebSocket` 只做信令：`join / peer-joined / offer / answer / ice-candidate / peer-left / error`
-- 画面走 `WebRTC MediaStream`，不经过服务端中转
-- 控制事件走 `RTCDataChannel`，不通过 WebSocket 发送
+## Repository Structure
 
-为什么服务端不转发视频流：
-- 降低服务端带宽和成本
-- 减少中转延迟
-- 更符合本项目 MVP 范围（可跑通优先）
+```text
+remote-desktop-webrtc/
+  client/   # Electron + React + Vite
+  server/   # Node.js + ws signaling service
+  docs/     # architecture, operations, delivery notes
+```
 
-## 5. 本地启动步骤
+## Configuration
 
-在项目根目录执行：
+### Server environment variables
+
+| Variable | Default | Description |
+|---|---:|---|
+| `PORT` | `8080` | HTTP + WebSocket listener port |
+| `HEARTBEAT_INTERVAL_MS` | `15000` | WebSocket ping interval |
+| `IDLE_TIMEOUT_MS` | `45000` | Idle socket eviction threshold |
+
+Reference: [`server/.env.example`](./server/.env.example)
+
+### Client environment variables
+
+| Variable | Default | Description |
+|---|---:|---|
+| `VITE_SIGNALING_URL` | `ws://localhost:8080` | Default signaling URL shown in UI |
+| `VITE_DEFAULT_ROOM_ID` | `demo-room` | Default room ID shown in UI |
+
+Reference: [`client/.env.example`](./client/.env.example)
+
+## Local Development
+
+From repository root:
 
 ```bash
 pnpm install
@@ -59,92 +90,63 @@ pnpm dev:server
 pnpm dev:client
 ```
 
-说明：
-- 信令服务默认 `ws://localhost:8080`
-- `pnpm dev:client` 会启动 Vite、Electron main/preload 编译和 Electron 应用
+Additional commands:
 
-## 6. 单机测试步骤（功能演示）
+```bash
+pnpm typecheck
+pnpm build
+```
 
-1. 启动 `server`：`pnpm dev:server`
-2. 启动第一个 `client`：`pnpm dev:client`
-3. 第一个窗口选择 `Start as Host`
-4. 再启动一个客户端窗口（新终端）：
-   - `pnpm --filter client dev:app`
-5. 第二个窗口选择 `Start as Viewer`
-6. 两端输入相同 `roomId`（默认 `demo-room`）
-7. Host 点击 `Start Screen Share`
-8. Viewer 确认看到 Host 画面
-9. Viewer 先点击 `Enable Remote Control`，再点击视频区域后移动/点击/按键
-10. Host 查看 `Control Event Logs` 是否持续收到事件
-11. Host 打开 `Allow Remote Control` 后，事件进入真实执行链路
-12. Viewer 按 `ESC`（或点 `ESC Stop`）验证紧急停止发送
+## Validation Flows
 
-## 7. 双机真实控制测试步骤
+### Single-machine functional test
 
-1. Machine A（被控端）运行 Host
-2. Machine B（控制端）运行 Viewer
-3. 两台机器都指向同一信令服务地址（例如 `ws://<A机器IP>:8080`）
-4. 使用相同 `roomId` 入房
-5. Host 开始屏幕共享
-6. Viewer 点击 `Enable Remote Control` 并在远程画面操作
-7. Host 打开 `Allow Remote Control`
-8. 在 Machine A 观察真实鼠标/键盘输入是否执行
+1. Start signaling server.
+2. Start first client as Host.
+3. Start second client instance as Viewer.
+4. Join same room ID.
+5. Host starts screen share.
+6. Viewer confirms remote video.
+7. Viewer enables control sending.
+8. Host verifies control logs and (optionally) native execution.
 
-## 8. 单机双开限制说明（重要）
+### Two-machine control test (recommended)
 
-- 同一台机器同时运行 Host 和 Viewer 时，真实输入会作用于本机，可能出现“自控冲突”。
-- 这是远程控制系统的正常现象，不是 WebRTC 链路错误。
-- 项目已提供三层保护：
-  - Viewer 默认不发送控制事件（必须手动 `Enable Remote Control`）
-  - Host 默认不执行真实控制（必须手动 `Allow Remote Control`）
-  - Viewer 支持 `ESC` 紧急停止发送
+1. Machine A runs Host + signaling.
+2. Machine B runs Viewer (Electron or browser).
+3. Both point to `ws://<MachineA-IP>:8080`.
+4. Use same room ID.
+5. Validate stream + control behavior.
 
-补充：
-- 如果 Host 分享的是包含 Viewer 的同一屏幕，会看到“镜中镜”递归画面，这是屏幕采集的正常结果。
-- 切换到不包含 Viewer 的屏幕/显示器后该现象会消失。
+## Health & Observability
 
-## 9. 当前 MVP 已实现能力
+- Health endpoint:
+  - `GET /healthz`
+  - returns process uptime and room/peer counters
+- Server logs:
+  - JSON structured logs for connect/join/pair/disconnect/error/shutdown
+- Connection hygiene:
+  - periodic ping/pong heartbeat
+  - stale socket termination after idle timeout
 
-- Host / Viewer 双模式 Electron 客户端
-- 基于 room 的信令管理（同房最多 2 端：host + viewer）
-- WebRTC `offer/answer/ice-candidate` 流程
-- Host 屏幕采集 + Viewer 远程视频显示
-- Viewer 采集 `mousemove / mousedown / mouseup / click / keydown / keyup`
-- 控制事件通过 `RTCDataChannel` 传输到 Host
-- Host 端 `Allow Remote Control` 开关
-- Viewer 端 `Enable Remote Control` 开关 + `ESC` 紧急停止
-- Host 端真实输入控制封装（`@nut-tree/nut-js`）+ 自动 mock 降级
-- 连接状态显示（`signalingState / iceConnectionState / connectionState`）
+## Security & Permission Model
 
-## 10. 当前限制
+- Signaling server does not relay media frames.
+- Native system control is gated by host UI switch.
+- Viewer must explicitly enable control before events are sent.
+- On macOS, native control requires Accessibility permission.
+- If native automation fails to initialize, system falls back to mock mode without crashing.
 
-- 当前优先本地网络 / 简单 NAT 场景
-- 生产环境需要 TURN 才能覆盖复杂网络
-- 默认未实现账号鉴权、审计、权限系统
-- 真实输入控制依赖系统权限和本机安全策略
-- 单机双开真实控制不适合长期操作，建议双机演示
+## Production Deployment Notes
 
-## 11. 生产级优化方向
+- Add TURN for restrictive NAT / enterprise networks.
+- Add token-based room authorization and session expiry.
+- Add audit logs for control actions.
+- Add reconnect/backoff strategy and peer session recovery.
+- Add transport security hardening (`wss`, reverse proxy, TLS termination).
 
-- TURN server
-- token 鉴权
-- 断线重连
-- 多显示器选择
-- 画质自适应
-- 输入事件节流
-- 审计日志
-- 权限系统
+## Documentation Index
 
-## 12. 真实控制权限说明
-
-Host 真实输入控制依赖系统权限：
-
-- macOS：
-  - 需要 `辅助功能 (Accessibility)` 权限
-  - 屏幕采集通常还需要 `屏幕录制 (Screen Recording)` 权限
-- Host 页面已提供权限引导按钮：
-  - `Request Permission`
-  - `Open Settings`
-  - `Refresh Status`
-
-如果 `nut.js` 初始化或权限检查失败，程序会自动降级到 mock，不会崩溃，并在日志中提示当前处于 mock 模式。
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Operations Runbook](./docs/OPERATIONS.md)
+- [Delivery Checklist](./docs/DELIVERY_CHECKLIST.md)

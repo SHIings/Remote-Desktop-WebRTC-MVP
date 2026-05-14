@@ -14,8 +14,10 @@ const initialMode: AppMode = modeParam === 'host' || modeParam === 'viewer' ? mo
 const App = (): JSX.Element => {
   const [mode, setMode] = useState<AppMode>(initialMode);
   const [sessionId, setSessionId] = useState(0);
-  const [signalingUrl, setSignalingUrl] = useState('ws://localhost:8080');
-  const [roomId, setRoomId] = useState('demo-room');
+  const [signalingUrl, setSignalingUrl] = useState(
+    import.meta.env.VITE_SIGNALING_URL ?? 'ws://localhost:8080'
+  );
+  const [roomId, setRoomId] = useState(import.meta.env.VITE_DEFAULT_ROOM_ID ?? 'demo-room');
 
   const startMode = (nextMode: PeerRole): void => {
     setSessionId((prev) => prev + 1);

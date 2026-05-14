@@ -196,7 +196,9 @@ const ViewerPanel = ({ signalingUrl, roomId, onBack }: ViewerPanelProps): JSX.El
 
         if (message.type === 'error') {
           setConnectionStatus(`Signaling error: ${message.message}`);
-          pushLog(`Server error: ${message.message}`);
+          pushLog(
+            `Server error${message.code ? ` [${message.code}]` : ''}: ${message.message}`
+          );
           return;
         }
       }

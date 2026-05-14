@@ -1,6 +1,6 @@
-# DELIVERY CHECKLIST
+# Delivery Checklist
 
-用于面试交付前的自检与演示对照。
+用于发布前功能验收与演示对照。
 
 ## 1. Feature checklist
 
@@ -48,13 +48,13 @@
 - 当前优先本地网络/简单 NAT，复杂网络需要 TURN
 - 暂无用户鉴权、审计日志和权限系统
 
-## 5. What to tell the interviewer
+## 5. Stakeholder Demo Notes
 
-- 这是一个按 MVP 取舍完成的一天作业：核心链路可跑通、结构分层清晰、演示路径完整。
-- 媒体流走 WebRTC，控制事件走 DataChannel，服务端仅做信令转发，符合远控架构边界。
-- 已实现安全保护：Viewer 默认禁发、Host 默认禁执行、ESC 紧急停止、权限检测与引导。
-- 真实输入能力采用 nut.js，并做了失败降级，避免安装/权限问题导致程序崩溃。
-- 生产化下一步重点：TURN、鉴权、重连、审计、显示器选择与输入节流。
+- 核心链路完整：信令、建连、媒体传输、控制事件、权限控制。
+- 媒体流与信令解耦：媒体点对点，服务端仅做信令，扩展成本更可控。
+- 安全默认值：Viewer 默认禁发控制，Host 默认禁执行真实输入，支持紧急停止。
+- 可运维性：具备健康检查端点、结构化日志、心跳与空闲连接回收。
+- 生产化路线清晰：TURN、鉴权、审计、重连、QoS 与策略治理。
 
 ## 6. Screenshots / demo video placeholders
 

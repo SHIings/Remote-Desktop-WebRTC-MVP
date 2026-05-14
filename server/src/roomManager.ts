@@ -1,5 +1,5 @@
 import type WebSocket from 'ws';
-import type { PeerInfo, PeerRole, Room } from './types';
+import type { PeerInfo, PeerRole, Room, RoomStats } from './types';
 
 export interface JoinResult {
   ok: boolean;
@@ -79,6 +79,22 @@ export class RoomManager {
 
   getRoom(roomId: string): Room | undefined {
     return this.rooms.get(roomId);
+  }
+
+  getStats(): RoomStats {
+    let pairedRooms = 0;
+
+    for (const room of this.rooms.values()) {
+      if (room.host && room.viewer) {
+        pairedRooms += 1;
+      }
+    }
+
+    return {
+      totalRooms: this.rooms.size,
+      totalPeers: this.peers.size,
+      pairedRooms
+    };
   }
 
   leave(socket: WebSocket): LeaveResult | undefined {
