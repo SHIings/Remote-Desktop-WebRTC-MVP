@@ -118,6 +118,36 @@ pnpm build
 4. Use same room ID.
 5. Validate stream + control behavior.
 
+## Demo Screenshots
+
+Put screenshot files under `docs/assets/` with the exact names below.
+
+### Host Overview
+
+![Host Overview](./docs/assets/host-overview.png)
+
+### Viewer Streaming
+
+![Viewer Streaming](./docs/assets/viewer-overview.jpg)
+
+### Control Events
+
+![Control Events](./docs/assets/control-events.png)
+
+### Safety Stop
+
+![Safety Stop](./docs/assets/viewer-events.jpg)
+
+## Demo Video
+
+Place the demo video under `docs/assets/`:
+
+- `docs/assets/demo.mp4`
+
+Repository viewers can open it directly from this link:
+
+- [Single-machine demo video](./docs/assets/demo.mp4)
+
 ## Health & Observability
 
 - Health endpoint:
